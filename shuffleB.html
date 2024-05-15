@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shuffleboard Score Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+        .team {
+            width: 100px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Shuffleboard Score Tracker</h1>
+        <div class="scoreboard">
+            <div class="team" id="team1">
+                <h2>Team 1</h2>
+                <p id="team1-score">0</p>
+                <button onclick="increaseScore('team1')">+1</button>
+            </div>
+            <div class="team" id="team2">
+                <h2>Team 2</h2>
+                <p id="team2-score">0</p>
+                <button onclick="increaseScore('team2')">+1</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function increaseScore(team) {
+            var scoreElement = document.getElementById(team + "-score");
+            var currentScore = parseInt(scoreElement.textContent);
+            scoreElement.textContent = currentScore + 1;
+        }
+    </script>
+</body>
+</html>
