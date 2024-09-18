@@ -26,33 +26,46 @@
 
             const file = fileInput.files[0];
             const reader = new FileReader();
-            
+
             reader.onload = function(event) {
                 const csvContent = event.target.result;
-                const rows = csvContent.split("\n");
-
+                const rows = csvContent.split("\n").map(row => row.split(","));
+                
                 // Get header and data rows
                 const header = rows[0];
-                const dataRows = rows.slice(1).filter(row => row.trim() !== "");
+                const dataRows = rows.slice(1).filter(row => row.length > 1);
+
+                // Find the indexes of the required columns
+                const quantityIndex = header.indexOf('quantity');
+                const priceIndex = header.indexOf('display_price');
+
+                // Add 'Store' column to header
+                header.push('Store');
 
                 const processedRows = [];
 
-                // Add header to processed rows
+                // Add the header to processed rows
                 processedRows.push(header);
 
                 // Process each row
                 dataRows.forEach(row => {
-                    const cols = row.split(",");
-                    const count = parseInt(cols[cols.length - 1]);  // Assuming "Count" is last column
+                    const quantity = parseInt(row[quantityIndex], 10); // Replicate based on 'quantity'
+                    
+                    // Format 'display_price' with $ and two decimal places
+                    if (priceIndex !== -1) {
+                        const price = parseFloat(row[priceIndex]).toFixed(2);
+                        row[priceIndex] = `$${price}`;
+                    }
 
-                    // Replicate row based on count
-                    for (let i = 0; i < count; i++) {
-                        processedRows.push(row);
+                    // Replicate row based on 'quantity' and add 'Store' column with value
+                    for (let i = 0; i < quantity; i++) {
+                        const newRow = [...row, 'Huckleberry Gardens'];
+                        processedRows.push(newRow);
                     }
                 });
 
-                // Create processed CSV content
-                const processedCSV = processedRows.join("\n");
+                // Convert processed rows back to CSV format
+                const processedCSV = processedRows.map(row => row.join(",")).join("\n");
 
                 // Trigger download of the processed CSV
                 downloadCSV(processedCSV);
