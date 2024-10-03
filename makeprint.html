@@ -95,11 +95,11 @@
 
         function generateTextBlock(sku, name, price) {
             return `CLS\nCODEPAGE 1252\nTEXT 345,172,"ROMAN.TTF",180,1,11,"${name}"\n` +
-                   `TEXT 249,128,"ROMAN.TTF",180,1,14,"${price}"\n` +
-                   `BARCODE 297,83,"128",49,0,180,2,4,"${sku}"\n` +
-                   `TEXT 250,35,"0",180,6,8,"${sku}"\n` +
-                   `TEXT 395,26,"ROMAN.TTF",90,1,6,"Huckleberry Gardens"\n` +
-                   `TEXT 375,37,"ROMAN.TTF",90,1,4,"Nursery and Garden Center"\nPRINT 1,1\n\n`;
+                   `TEXT 142,77,"ROMAN.TTF",180,1,16,"${price}"\n` +
+                   `BARCODE 377,92,"128",63,0,180,2,4,"${sku}"\n` +
+                   `TEXT 336,26,"1",180,1,1,"${sku}"\n` +
+                   `TEXT 264,200,"ROMAN.TTF",180,1,6,"Huckleberry Gardens"\n` +
+                   `PRINT 1,1\n\n`;
         }
 
         function downloadTXT(outputTxt) {
