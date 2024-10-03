@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV to TXT Converter</title>
+</head>
+<body>
+    <h1>Upload CSV to Generate TXT</h1>
+    <form id="uploadForm">
+        <input type="file" id="csvFile" name="csvFile" accept=".csv" required>
+        <button type="submit">Convert</button>
+    </form>
+    <div id="error" style="color: red;"></div>
+    <div id="downloadLink"></div>
+
+    <script>
+        document.getElementById('uploadForm').onsubmit = function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            if (!file) {
+                document.getElementById('error').innerText = 'Please select a file!';
+                return;
+            }
+            if (!file.name.endsWith('.csv')) {
+                document.getElementById('error').innerText = 'Please upload a CSV file.';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const csvText = event.target.result;
+                processCSV(csvText);
+            };
+            reader.readAsText(file);
+        };
+
+        function processCSV(csvText) {
+            const rows = csvText.split('\n');
+            const header = rows[0].split(',');
+            if (header.length !== 4 || header[0].trim() !== 'SKU' || header[1].trim() !== 'Name' || header[2].trim() !== 'Price' || header[3].trim() !== 'Count') {
+                document.getElementById('error').innerText = 'CSV header should have exactly these four columns: SKU, Name, Price, Count.';
+                return;
+            }
+
+            // Add the specified lines to the start of the output
+            let outputTxt = `SIZE 50.8 mm, 25.4 mm\nGAP 3 mm, 0 mm\nDIRECTION 0,0\nREFERENCE 0,0\n` +
+                            `OFFSET 0 mm\nSET PEEL OFF\nSET CUTTER OFF\nSET PARTIAL_CUTTER OFF\nSET TEAR ON\n\n`;
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i].split(',');
+                const sku = row[0]?.trim();
+                const name = row[1]?.trim();
+                const price = row[2]?.trim();
+                const count = row[3]?.trim();
+
+                if (!sku || !name || !price || !count) {
+                    document.getElementById('error').innerText = 'Missing or blank fields in CSV rows.';
+                    return;
+                }
+
+                const repeatCount = parseInt(count);
+                if (isNaN(repeatCount) || repeatCount <= 0) {
+                    document.getElementById('error').innerText = 'Invalid Count value in CSV. It should be a positive number.';
+                    return;
+                }
+
+                const textBlock = generateTextBlock(sku, name, price);
+                outputTxt += textBlock.repeat(repeatCount);
+            }
+
+            downloadTXT(outputTxt);
+        }
+
+        function generateTextBlock(sku, name, price) {
+            return `CLS\nCODEPAGE 1252\nTEXT 345,
