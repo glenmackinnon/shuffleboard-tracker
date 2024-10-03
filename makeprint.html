@@ -17,51 +17,70 @@
     <script>
         document.getElementById('uploadForm').onsubmit = function(e) {
             e.preventDefault();
+            console.log("Form submitted");
+
             const fileInput = document.getElementById('csvFile');
             const file = fileInput.files[0];
+            
             if (!file) {
+                console.error('No file selected');
                 document.getElementById('error').innerText = 'Please select a file!';
                 return;
             }
+            
             if (!file.name.endsWith('.csv')) {
+                console.error('Invalid file format');
                 document.getElementById('error').innerText = 'Please upload a CSV file.';
                 return;
             }
 
             const reader = new FileReader();
             reader.onload = function(event) {
+                console.log("File read successfully");
                 const csvText = event.target.result;
+                console.log("CSV Content:", csvText);
                 processCSV(csvText);
             };
+            reader.onerror = function(event) {
+                console.error("Error reading file:", event);
+                document.getElementById('error').innerText = 'Error reading file.';
+            };
+            
             reader.readAsText(file);
         };
 
         function processCSV(csvText) {
             const rows = csvText.split('\n');
             const header = rows[0].split(',');
+            console.log("CSV Header:", header);
+
             if (header.length !== 4 || header[0].trim() !== 'SKU' || header[1].trim() !== 'Name' || header[2].trim() !== 'Price' || header[3].trim() !== 'Count') {
+                console.error('Invalid CSV header');
                 document.getElementById('error').innerText = 'CSV header should have exactly these four columns: SKU, Name, Price, Count.';
                 return;
             }
 
-            // Add the specified lines to the start of the output
             let outputTxt = `SIZE 50.8 mm, 25.4 mm\nGAP 3 mm, 0 mm\nDIRECTION 0,0\nREFERENCE 0,0\n` +
                             `OFFSET 0 mm\nSET PEEL OFF\nSET CUTTER OFF\nSET PARTIAL_CUTTER OFF\nSET TEAR ON\n\n`;
 
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i].split(',');
+                console.log("Processing row:", row);
+
                 const sku = row[0]?.trim();
                 const name = row[1]?.trim();
                 const price = row[2]?.trim();
                 const count = row[3]?.trim();
 
                 if (!sku || !name || !price || !count) {
+                    console.error('Missing or blank fields in row', i);
                     document.getElementById('error').innerText = 'Missing or blank fields in CSV rows.';
                     return;
                 }
 
                 const repeatCount = parseInt(count);
                 if (isNaN(repeatCount) || repeatCount <= 0) {
+                    console.error('Invalid count value in row', i);
                     document.getElementById('error').innerText = 'Invalid Count value in CSV. It should be a positive number.';
                     return;
                 }
@@ -70,8 +89,32 @@
                 outputTxt += textBlock.repeat(repeatCount);
             }
 
+            console.log("Output text generated successfully");
             downloadTXT(outputTxt);
         }
 
         function generateTextBlock(sku, name, price) {
-            return `CLS\nCODEPAGE 1252\nTEXT 345,
+            return `CLS\nCODEPAGE 1252\nTEXT 345,172,"ROMAN.TTF",180,1,11,"${name}"\n` +
+                   `TEXT 125,94,"ROMAN.TTF",180,1,14,"${price}"\n` +
+                   `BARCODE 335,121,"128M",77,0,180,2,4,"!105${sku}"\n` +
+                   `TEXT 294,37,"0",180,7,9,"${sku}"\n` +
+                   `TEXT 395,26,"ROMAN.TTF",90,1,6,"Huckleberry Gardens"\n` +
+                   `TEXT 375,37,"ROMAN.TTF",90,1,4,"Nursery and Garden Center"\nPRINT 1,1\n\n`;
+        }
+
+        function downloadTXT(outputTxt) {
+            console.log("Preparing file for download");
+            const blob = new Blob([outputTxt], { type: 'text/plain' });
+            const downloadLink = document.createElement('a');
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = 'output.txt';
+            downloadLink.innerText = 'Download Processed TXT';
+            
+            const linkContainer = document.getElementById('downloadLink');
+            linkContainer.innerHTML = '';
+            linkContainer.appendChild(downloadLink);
+            console.log("File download link generated");
+        }
+    </script>
+</body>
+</html>
