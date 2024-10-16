@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto Image Extractor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 50px;
+    }
+    iframe {
+      width: 600px;
+      height: 400px;
+      margin-top: 20px;
+      border: 2px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Image Extractor</h1>
+  <iframe id="imageFrame" title="Extracted Image Viewer"></iframe>
+
+  <script>
+    // URL to fetch content from
+    const targetUrl = "https://www.gocomics.com/pearlsbeforeswine/2024/10/16";
+
+    // Regex to match the image URL pattern from assets.amuniversal.com
+    const imageRegex = /(https?:\/\/assets\.amuniversal\.com\/[a-f0-9]{32})/i;
+
+    // Fetch page content and load the image on page load
+    window.onload = async function() {
+      try {
+        const response = await fetch(`https://cors-anywhere.herokuapp.com/${targetUrl}`); // Bypass CORS
+        if (!response.ok) throw new Error('Failed to fetch page content.');
+
+        const text = await response.text();
+        const match = text.match(imageRegex);
+
+        if (match && match[0]) {
+          const imageUrl = match[0];
+          loadInIframe(imageUrl);
+        } else {
+          alert('No matching image URL found on the page.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to load the page content.');
+      }
+    };
+
+    // Load the image URL into the iframe
+    function loadInIframe(imageUrl) {
+      const iframe = document.getElementById('imageFrame');
+      iframe.src = imageUrl;
+    }
+  </script>
+</body>
+</html>
